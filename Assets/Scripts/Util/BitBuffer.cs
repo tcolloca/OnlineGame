@@ -9,7 +9,16 @@ public class BitBuffer {
 	private int start;
 	private int size;
 	private readonly LinkedList<byte> bytes;
-	public byte[] Bytes { get { return bytes.ToArray (); } }
+
+	public byte[] Bytes { 
+		get { 
+			if (start == 0) {
+				return bytes.ToArray (); 
+			} else {
+				return DequeueBytes ((int) Math.Ceiling (size / 8.0));
+			}
+		} 
+	}
 
 	public BitBuffer () {
 		start = 0;
@@ -37,33 +46,34 @@ public class BitBuffer {
 		}
 	}
 		
+	public void EnqueueByte (byte value) {
+		EnqueueBits (value, 8);
+	}
+		
 	public void EnqueueBit (byte value) {
 		if (value != 0 && value != 1) {
 			throw new ArgumentOutOfRangeException ("Value should be 0 or 1.");
 		}
-		if (size % 8 == 0) {
-			bytes.AddFirst (0);
-		}
-		EnqueueValue (value, 1);
+		EnqueueValue ((byte) value, 1);
 	}
 
-	public void EnqueueByte (byte value) {
-		if (size % 8 == 0) {
-			bytes.AddFirst (value);
-			size += 8;
-		} else {
-			int firstN = 8 - (size % 8);
-			int lastN = size % 8; 
-			EnqueueValue ((byte) value, firstN);
-			bytes.AddFirst (0);
+	public void EnqueueBits (byte value, int n) {
+		int firstN = Math.Min (8 - (size % 8), n);
+		int lastN = n - firstN;
+		EnqueueValue ((byte) value, firstN);
+		if (lastN > 0) {
 			EnqueueValue ((byte) (value >> firstN), lastN);
 		}
 	}
 		
 	private void EnqueueValue (byte value, int n) {
+		if (size % 8 == 0) {
+			bytes.AddFirst (0);
+		}
+		int mask = (1 << n) - 1;
 		byte b = bytes.First.Value;
 		bytes.RemoveFirst ();
-		b = (byte) (b | value << (size % 8));
+		b = (byte) (b | ((mask & value) << (size % 8)));
 		size += n;
 		bytes.AddFirst (b);
 	}
@@ -84,18 +94,17 @@ public class BitBuffer {
 		return bytes;
 	}
 
+	public byte DequeueByte () {
+		return DequeueBits (8);
+	}
+
 	public byte DequeueBit () {
 		return DequeueValue (1);
 	}
 
-	public byte DequeueByte () {
-		if (start % 8 == 0) {
-			byte b = bytes.Last.Value;
-			bytes.RemoveLast ();
-			return b; 
-		} 
-		int firstN = 8 - start;
-		int lastN = start;
+	public byte DequeueBits (int n) {
+		int firstN = n - start;
+		int lastN = n - firstN;
 		byte firstB = DequeueValue (firstN);
 		byte lastB = DequeueValue (lastN);
 		return (byte) (firstB | (lastB << lastN));

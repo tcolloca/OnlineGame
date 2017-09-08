@@ -2,6 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface GameEvent<T> : Serializable<T> {
+public interface GameEvent : ISerializable {
 
 }

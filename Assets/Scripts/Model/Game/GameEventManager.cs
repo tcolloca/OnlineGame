@@ -31,16 +31,13 @@ public class GameEventManager : InputEventListener {
 		foreach (KeyCode keyCode in movKeyCodes) {
 			rdlu[i++] = inputEvent.pressedKeys.Contains (keyCode);
 		}
-		MovementEvent movEvent = new MovementEvent (rdlu);
+		MovementEvent movementEvent = new MovementEvent (inputEvent.player, rdlu);
+		foreach (GameEventListener listener in listeners) {
+			listener.onMovement (movementEvent);
+		}
 	}
 
 	public void AddListener (GameEventListener listener) {
 		listeners.Add (listener);
-	}
-
-	private void Multicast<T> (GameEvent<T> gameEvent) {
-		foreach (GameEventListener listener in listeners) {
-			listener.onGameEvent (gameEvent);
-		}
 	}
 }

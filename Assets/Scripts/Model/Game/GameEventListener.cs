@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface GameEventListener {
 
-	void onGameEvent<T> (GameEvent<T> gameEvent);
+	void onMovement (MovementEvent gameEvent);
 }

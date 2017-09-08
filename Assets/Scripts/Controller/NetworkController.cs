@@ -1,15 +1,37 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class NetworkController {
+public class NetworkController : MonoBehaviour, GameEventListener {
 
-	// Use this for initialization
-	void Start () {
-		
+	private int clientPort;
+	private int serverPort;
+	private NetworkManager networkManager;
+
+	public void Start () {
+		DontDestroyOnLoad (transform.gameObject);
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+
+	public NetworkController ListenOn (int clientPort) {
+		this.clientPort = clientPort;
+		return this;
+	}
+
+	public NetworkController ConnectTo (int serverPort) {
+		this.serverPort = serverPort;
+		return this;
+	}
+
+	public void Connect () {
+		networkManager = new NetworkManager (clientPort, serverPort);
+	}
+
+	public void onMovement (MovementEvent movementEvent) {
+		networkManager.Send (movementEvent);
+	}
+
+	public void OnApplicationQuit () {    
+		if (networkManager != null) {
+			networkManager.Close ();
+		}
 	}
 }

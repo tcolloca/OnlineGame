@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface Serializable<T> {
+public interface ISerializable {
 
 	byte[] Serialize ();
 
-	T Deserialize (byte[] bytes);
+	ISerializable Deserialize (byte[] bytes);
 }

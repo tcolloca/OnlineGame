@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
-	// Use this for initialization
+	public float speed = 0.5f;
+	private Player player;
+	private PlayerInputRecorder inputRecorder;
+
 	void Start () {
-		
+		player = new Player (1);
+		inputRecorder = new PlayerInputRecorder (player);
 	}
 	
-	// Update is called once per frame
 	void Update () {
-		
+		inputRecorder.Record ();
 	}
 }

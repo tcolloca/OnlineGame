@@ -27,9 +27,4 @@ public class TestController : MonoBehaviour {
 //		} while (dg != null);
 //		Debug.Log ("Finished update :) " + i);
 	}
-
-	public void OnApplicationQuit () {      
-		Debug.Log ("QUIT!");
-		channel.Close ();
-	}
 }
