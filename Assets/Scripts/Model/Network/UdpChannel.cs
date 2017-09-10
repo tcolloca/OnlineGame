@@ -26,6 +26,7 @@ public class UdpChannel : IChannel<Datagram> {
 	}
 
 	public void Send (Datagram datagram) {
+		Debug.Log ("Sending from: " + client.Client.LocalEndPoint.ToString ());
 		client.Send (datagram.bytes, datagram.bytes.Length, datagram.endPoint);
 	}
 
@@ -47,7 +48,7 @@ public class UdpChannel : IChannel<Datagram> {
 				IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
 				Debug.Log ("Blocking");
 				byte[] data = client.Receive (ref remoteEndPoint);
-				Debug.Log ("Unblocked!");
+				Debug.Log ("Unblocked!: " + remoteEndPoint.Port.ToString ());
 				Datagram datagram = new Datagram (data, remoteEndPoint);
 				lock (datagramQueueLock) {
 					datagramQueue.Enqueue (datagram);
@@ -65,7 +66,8 @@ public class UdpChannel : IChannel<Datagram> {
 		uint IOC_VENDOR = 0x18000000;
 		uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
 		client.Client.IOControl ((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte (false) }, null);
-		IPEndPoint listenEndpoint = new IPEndPoint (IPAddress.Any, port);
+		Debug.Log (port);
+		IPEndPoint listenEndpoint = new IPEndPoint (IPAddress.Parse("127.0.0.1"), port);
 		client.ExclusiveAddressUse = false;
 		client.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
 		client.Client.Bind (listenEndpoint);

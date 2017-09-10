@@ -22,7 +22,8 @@ public class MessageMulticaster {
 	}
 
 	public void onReceived (Message obj) {
-		foreach (MessageListener listener in listeners) {
+		List<MessageListener> aux = new List<MessageListener> (listeners);
+		foreach (MessageListener listener in aux) {
 			try {
 				obj.Apply (listener);
 			} catch (Exception e) {

@@ -13,22 +13,10 @@ public class Server : NetworkManager {
 	}
 
 	public override ParsedDatagram Receive () {
-		/*
-		Debug.Log ("Assert");
-		ParsedDatagram datagram = base.Receive ();
-		if (datagram != null) {
-			Debug.Log ("Server datagram...: " + datagram.message);
-			if (datagram.message is JoinMessage) {
-				Debug.Log ("adding endpoint");
-				clientEndPoints.Add (datagram.endPoint);
-			} else if (datagram.message is LeaveMessage) {
-				clientEndPoints.Remove (datagram.endPoint);
-			}
-		} */
 		Datagram datagram = channel.Receive ();
-		Debug.Log (datagram);
 		if (datagram != null) {
 			Message message = serializer.Deserialize (datagram.bytes);
+			Debug.Log ("Received Message: " + message);
 			if (message is JoinMessage) {
 				Debug.Log ("Join");
 				clientEndPoints.Add (datagram.endPoint);

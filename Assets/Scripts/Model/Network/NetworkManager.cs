@@ -16,15 +16,15 @@ public abstract class NetworkManager : MessageAdapter {
 	}
 
 	public void Send (ISerializable obj, IPEndPoint endPoint) {
-		Debug.Log ("Sending: " + buildDatagram (serializer.Serialize (obj), endPoint));
+		Debug.Log ("Sending: " + obj);
 		channel.Send (buildDatagram (serializer.Serialize (obj), endPoint));
 	}
 
 	public virtual ParsedDatagram Receive () {
 		Datagram datagram = channel.Receive ();
-		Debug.Log (datagram);
 		if (datagram != null) {
 			Message message = serializer.Deserialize (datagram.bytes);
+			Debug.Log ("Received: " + message);
 			MessageMulticaster.Instance.onReceived(message);
 			Debug.Log ("Returning not null :(");
 			return new ParsedDatagram (datagram.endPoint, message);

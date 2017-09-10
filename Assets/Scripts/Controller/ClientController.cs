@@ -13,6 +13,8 @@ public class ClientController : MonoBehaviour {
 	private MainPlayer player;
 	private bool hasJoined;
 
+	int i = 0;
+
 	public void Start () {
 		DontDestroyOnLoad (transform.gameObject);
 		PlayerDatabase.Instance.SetPlayerGo (playerGo);
@@ -21,7 +23,7 @@ public class ClientController : MonoBehaviour {
 	public void Update () {
 		if (client != null) {
 			client.Receive ();
-			if (!client.hasJoined) {
+			if (!client.hasJoined && i % 100 == 0) {
 				Debug.Log ("Sending Join...");
 				client.Join ();
 			}
@@ -29,6 +31,7 @@ public class ClientController : MonoBehaviour {
 		if (player != null) {
 			player.RecordInput ();
 		}
+		i++;
 	}
 
 	public void Play () {
@@ -36,7 +39,7 @@ public class ClientController : MonoBehaviour {
 		int serverPort = int.Parse (serverPortText.text);
 		this.player = new MainPlayer (1, playerGo);
 		PlayerDatabase.Instance.Init ();
-		this.client = new Client (player.id, clientPort).ConnectTo (serverPort);
+		this.client = new Client (clientPort, player.id).ConnectTo (serverPort);
 
 		SceneManager.LoadScene ("Game");
 	}

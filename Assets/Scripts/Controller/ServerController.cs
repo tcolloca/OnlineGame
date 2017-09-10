@@ -11,6 +11,8 @@ public class ServerController : MonoBehaviour {
 
 	private Server server;
 
+	int i = 0;
+
 	public void Start () {
 		DontDestroyOnLoad (transform.gameObject);
 		PlayerDatabase.Instance.SetPlayerGo (playerGo);
@@ -19,8 +21,11 @@ public class ServerController : MonoBehaviour {
 	public void Update () {
 		if (server != null) {
 			server.Receive ();
-			server.SendSnapshot ();
+			if (i % 100 == 0) {
+				server.SendSnapshot ();
+			}
 		}
+		i++;
 	}
 
 	public void Open () {
