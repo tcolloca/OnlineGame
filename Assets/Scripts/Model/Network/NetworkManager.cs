@@ -3,36 +3,40 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Net;
 
-public class NetworkManager {
+public abstract class NetworkManager : MessageAdapter {
 
-	private IChannel<Datagram> channel;
-	private int serverPort;
-	private Serializer serializer;
+	protected IChannel<Datagram> channel;
+	protected Serializer serializer;
+	private int port;
 
-	public NetworkManager (int clientPort, int serverPort) {
+	public NetworkManager (int port) {
 		channel = new UdpChannel ();
-		channel.Open (clientPort);
-		this.serverPort = serverPort;
+		channel.Open (port);
 		serializer = new Serializer ();
+	}
+
+	public void Send (ISerializable obj, IPEndPoint endPoint) {
+		Debug.Log ("Sending: " + buildDatagram (serializer.Serialize (obj), endPoint));
+		channel.Send (buildDatagram (serializer.Serialize (obj), endPoint));
+	}
+
+	public virtual ParsedDatagram Receive () {
+		Datagram datagram = channel.Receive ();
+		Debug.Log (datagram);
+		if (datagram != null) {
+			Message message = serializer.Deserialize (datagram.bytes);
+			MessageMulticaster.Instance.onReceived(message);
+			Debug.Log ("Returning not null :(");
+			return new ParsedDatagram (datagram.endPoint, message);
+		}
+		return null;
 	}
 
 	public void Close () {
 		channel.Close ();
 	}
 
-	public void Send (ISerializable obj) {
-		channel.Send (buildDatagram (serializer.Serialize (obj)));
-	}
-
-	public ISerializable Receive () {
-		Datagram datagram = channel.Receive ();
-		if (datagram != null) {
-			return serializer.Deserialize (datagram.bytes);
-		}
-		return null;
-	}
-
-	private Datagram buildDatagram (byte[] bytes) {
-		return new Datagram (bytes, new IPEndPoint (IPAddress.Parse("127.0.0.1"), serverPort));
+	private Datagram buildDatagram (byte[] bytes, IPEndPoint endPoint) {
+		return new Datagram (bytes, endPoint);
 	}
 }

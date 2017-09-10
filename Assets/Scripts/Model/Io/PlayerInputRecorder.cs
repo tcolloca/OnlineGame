@@ -21,11 +21,10 @@ public class PlayerInputRecorder {
 	public void Record () {
 		InputEvent inputEvent = new InputEvent (player);
 		foreach (KeyCode keyCode in interestKeyCodes) {
-			bool wasPressed;
-			keyCodes.TryGetValue (keyCode, out wasPressed);
+			bool wasPressed = keyCodes [keyCode];
 			bool isPressed = Input.GetKey (keyCode);
 			if (wasPressed != isPressed) {
-				keyCodes.Add (keyCode, isPressed);
+				keyCodes[keyCode] = isPressed;
 			}
 			if (!wasPressed && isPressed) {
 				inputEvent.AddKeyCode (keyCode);

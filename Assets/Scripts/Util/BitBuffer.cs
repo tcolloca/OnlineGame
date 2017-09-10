@@ -32,12 +32,20 @@ public class BitBuffer {
 		this.bytes = new LinkedList<byte> (bytes);
 	}
 
+	public void EnqueueSerializable (IBitBufferSerializable serializable) {
+		serializable.Serialize (this);
+	}
+
 	public void EnqueueBool (bool value) {
 		EnqueueBit ((byte) (value ? 1 : 0));
 	}
 
 	public void EnqueueInt (int value) {
 		EnqueueBytes (BitConverter.GetBytes (value));
+	}
+
+	public void EnqueueEnum (Enum value, Enum total) {
+		EnqueueBits ((byte) Convert.ToByte(value), requiredBits (total));
 	}
 
 	public void EnqueueBytes (byte[] values) {
@@ -86,6 +94,10 @@ public class BitBuffer {
 		return BitConverter.ToInt32 (DequeueBytes (4), 0);
 	}
 
+	public int DequeueEnum (Enum total) {
+		return DequeueBits (requiredBits (total));
+	}
+
 	public byte[] DequeueBytes (int n) {
 		byte[] bytes = new byte[n];
 		for (int i = 0; i < n; i++) {
@@ -106,8 +118,11 @@ public class BitBuffer {
 		int firstN = n - start;
 		int lastN = n - firstN;
 		byte firstB = DequeueValue (firstN);
-		byte lastB = DequeueValue (lastN);
-		return (byte) (firstB | (lastB << lastN));
+		if (lastN > 0) {
+			byte lastB = DequeueValue (lastN);
+			return (byte) (firstB | (lastB << lastN));
+		}
+		return firstB;
 	}
 
 	private byte DequeueValue (int n) {
@@ -121,6 +136,16 @@ public class BitBuffer {
 			bytes.RemoveLast ();
 		}
 		return value;
+	}
+
+	private int requiredBits (Enum totalEnum) {
+		int n = 0;
+		int total = Convert.ToInt32 (totalEnum) - 1;
+		while (total != 0) {
+			total = total >> 1;
+			n++;
+		}
+		return n;
 	}
 
 	public void Print () {

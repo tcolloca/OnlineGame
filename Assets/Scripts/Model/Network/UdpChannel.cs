@@ -34,7 +34,6 @@ public class UdpChannel : IChannel<Datagram> {
 			return null;
 		}
 		lock (datagramQueueLock) {
-			Debug.Log ("Size: " + datagramQueue.Count);
 			if (datagramQueue.Count == 0) {
 				return null;
 			}
@@ -46,7 +45,9 @@ public class UdpChannel : IChannel<Datagram> {
 		while (keepAlive) {
 			try {
 				IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+				Debug.Log ("Blocking");
 				byte[] data = client.Receive (ref remoteEndPoint);
+				Debug.Log ("Unblocked!");
 				Datagram datagram = new Datagram (data, remoteEndPoint);
 				lock (datagramQueueLock) {
 					datagramQueue.Enqueue (datagram);
