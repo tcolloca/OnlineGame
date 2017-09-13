@@ -7,6 +7,12 @@ public class Serializer {
 		BitBuffer bitBuffer = new BitBuffer ();
 		if (ConfigProperties.Instance.isServer) {
 			bitBuffer.EnqueueEnum (MessageType.SERVER, MessageType.TOTAL);
+			if (obj is PlayerJoinedMessage) {
+				bitBuffer.EnqueueEnum (ServerMessageType.PLAYER_JOINED, MessageType.SERVER);
+			}
+			if (obj is PlayerLeftMessage) {
+				bitBuffer.EnqueueEnum (ServerMessageType.PLAYER_LEFT, MessageType.SERVER);
+			}
 			if (obj is SnapshotMessage) {
 				bitBuffer.EnqueueEnum (ServerMessageType.SNAPSHOT, MessageType.SERVER);
 			}
