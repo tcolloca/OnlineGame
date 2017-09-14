@@ -23,11 +23,13 @@ public class ClientController : MonoBehaviour {
 	public void Update () {
 		if (client != null) {
 			client.Receive ();
-			if (!client.hasJoined && i % 100 == 0) {
-				Debug.Log ("Sending Join...");
-				client.Join ();
+			if (i % 10 == 0) {
+				if (!client.hasJoined) {
+					Debug.Log ("Sending Join...");
+					client.Join ();
+				}
+				client.RecordInput ();
 			}
-			client.RecordInput ();
 		}
 		i++;
 	}

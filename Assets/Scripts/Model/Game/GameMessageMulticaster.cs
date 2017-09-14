@@ -21,11 +21,12 @@ public class GameMessageMulticaster : InputEventListener {
 	private readonly List<GameMessageListener> listeners;
 
 	private GameMessageMulticaster () {
-		InputEventMulticaster.Instance.AddListener (this);
 		listeners = new List<GameMessageListener> ();
+		InputEventMulticaster.Instance.AddListener (this);
 	}
 
 	public void onInput (InputEvent inputEvent) {
+		Debug.Log ("inputEvent");
 		bool[] rdlu = new bool[4];
 		int i = 0;
 		foreach (KeyCode keyCode in movKeyCodes) {

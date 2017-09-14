@@ -12,6 +12,7 @@ public class MainPlayer {
 	}
 
 	public void RecordInput () {
+		Debug.Log ("Record");
 		inputRecorder.Record ();
 	}
 }

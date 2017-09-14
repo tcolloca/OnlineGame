@@ -22,6 +22,7 @@ public class InputEventMulticaster {
 	}
 
 	public void Multicast (InputEvent inputEvent) {
+		Debug.Log (inputEvent);
 		foreach (InputEventListener listener in listeners) {
 			listener.onInput (inputEvent);
 		}
