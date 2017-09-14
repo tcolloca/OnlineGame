@@ -8,10 +8,12 @@ public class Client : NetworkManager {
 
 	private int playerId;
 	private int serverPort;
+	private MainPlayer player;
 
 	public Client (int port, int playerId) : base (port) {
 		this.playerId = playerId;
 		this.hasJoined = false;
+		MessageMulticaster.Instance.AddListener (this);
 	}
 		
 	public Client ConnectTo (int serverPort) {
@@ -19,9 +21,16 @@ public class Client : NetworkManager {
 		return this;
 	}
 
+	public void RecordInput () {
+		if (player != null) {
+			player.RecordInput ();
+		}
+	}
+
 	public override void onPlayerJoined (PlayerJoinedMessage message) {
 		Debug.Log ("PLAYER JOINED! " + message.playerId);
 		if (message.playerId == playerId) {
+			player = new MainPlayer(PlayerDatabase.Instance.GetPlayer (playerId));
 			hasJoined = true;
 		}
 	}
@@ -30,8 +39,8 @@ public class Client : NetworkManager {
 		Send (new JoinMessage (playerId));
 	}
 
-	public void Send (ISerializable obj) {
-		Send (obj, new IPEndPoint (IPAddress.Parse("127.0.0.1"), serverPort));
+	public void Send (IBitBufferSerializable obj) {
+		Send (obj, new IPEndPoint (IPAddress.Parse("192.168.0.116"), serverPort));
 	}
 }
 

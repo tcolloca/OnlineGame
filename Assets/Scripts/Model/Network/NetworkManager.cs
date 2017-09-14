@@ -15,7 +15,7 @@ public abstract class NetworkManager : MessageAdapter {
 		serializer = new Serializer ();
 	}
 
-	public void Send (ISerializable obj, IPEndPoint endPoint) {
+	public void Send (IBitBufferSerializable obj, IPEndPoint endPoint) {
 		Debug.Log ("Sending: " + obj);
 		channel.Send (buildDatagram (serializer.Serialize (obj), endPoint));
 	}

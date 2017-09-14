@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Serializer {
 
-	public byte[] Serialize (ISerializable obj) {
+	public byte[] Serialize (IBitBufferSerializable obj) {
 		BitBuffer bitBuffer = new BitBuffer ();
 		if (ConfigProperties.Instance.isServer) {
 			bitBuffer.EnqueueEnum (MessageType.SERVER, MessageType.TOTAL);
@@ -16,14 +16,18 @@ public class Serializer {
 			}
 		} else {
 			bitBuffer.EnqueueEnum (MessageType.CLIENT, MessageType.TOTAL);
-			if (obj is GameEvent) {
+			if (obj is JoinMessage) {
+				bitBuffer.EnqueueEnum (ClientMessageType.JOIN, ClientMessageType.TOTAL);
+			} else if (obj is LeaveMessage) {
+				bitBuffer.EnqueueEnum (ClientMessageType.LEAVE, ClientMessageType.TOTAL);
+			} else if (obj is GameEvent) {
 				bitBuffer.EnqueueEnum (ClientMessageType.GAME, ClientMessageType.TOTAL);
 				if (obj is MovementMessage) {
 					bitBuffer.EnqueueEnum (GameMessageType.MOVEMENT, GameMessageType.TOTAL);
 				}
 			}
 		}
-		bitBuffer.EnqueueBytes (obj.Serialize ());
+		obj.Serialize (bitBuffer);
 		bitBuffer.Print ();
 		Debug.Log ("----");
 		return bitBuffer.Bytes;

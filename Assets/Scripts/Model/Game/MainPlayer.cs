@@ -1,12 +1,14 @@
 ﻿using System;
 using UnityEngine;
 
-public class MainPlayer : Player {
+public class MainPlayer {
 
+	private Player player;
 	private PlayerInputRecorder inputRecorder;
 
-	public MainPlayer (int playerId, GameObject playerGo) : base (playerId, playerGo) {
-		inputRecorder = new PlayerInputRecorder (this);
+	public MainPlayer (Player player) {
+		this.player = player;
+		this.inputRecorder = new PlayerInputRecorder (player);
 	}
 
 	public void RecordInput () {

@@ -46,7 +46,7 @@ public class Server : NetworkManager {
 		Broadcast (new PlayerLeftMessage (joinMessage.playerId));
 	}
 
-	private void Broadcast (ISerializable serializable) {
+	private void Broadcast (IBitBufferSerializable serializable) {
 		foreach (IPEndPoint endPoint in clientEndPoints) {
 			Debug.Log ("Sending broadcast (broadcast) " + endPoint);
 			Send (serializable, endPoint);

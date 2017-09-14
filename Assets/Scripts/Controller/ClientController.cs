@@ -27,9 +27,7 @@ public class ClientController : MonoBehaviour {
 				Debug.Log ("Sending Join...");
 				client.Join ();
 			}
-		}
-		if (player != null) {
-			player.RecordInput ();
+			client.RecordInput ();
 		}
 		i++;
 	}
@@ -37,9 +35,8 @@ public class ClientController : MonoBehaviour {
 	public void Play () {
 		int clientPort = int.Parse (clientPortText.text);
 		int serverPort = int.Parse (serverPortText.text);
-		this.player = new MainPlayer (1, playerGo);
 		PlayerDatabase.Instance.Init ();
-		this.client = new Client (clientPort, player.id).ConnectTo (serverPort);
+		this.client = new Client (clientPort, 1).ConnectTo (serverPort);
 
 		SceneManager.LoadScene ("Game");
 	}
