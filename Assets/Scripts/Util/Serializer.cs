@@ -21,6 +21,7 @@ public class Serializer {
 			} else if (obj is LeaveMessage) {
 				bitBuffer.EnqueueEnum (ClientMessageType.LEAVE, ClientMessageType.TOTAL);
 			} else if (obj is GameMessage) {
+				bitBuffer.EnqueueEnum (ClientMessageType.GAME, ClientMessageType.TOTAL);
 				if (obj is MovementMessage) {
 					bitBuffer.EnqueueEnum (GameMessageType.MOVEMENT, GameMessageType.TOTAL);
 				}

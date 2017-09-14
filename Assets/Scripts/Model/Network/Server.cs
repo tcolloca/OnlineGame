@@ -40,7 +40,6 @@ public class Server : NetworkManager {
 	}
 
 	public override void onJoin (JoinMessage joinMessage) {
-		Debug.Log ("Sending joined (on join)!");
 		Broadcast (new PlayerJoinedMessage (joinMessage.playerId));
 	}
 

@@ -55,7 +55,6 @@ public class PlayerDatabase : MessageAdapter {
 	}
 
 	public override void onJoin (JoinMessage message) {
-		Debug.Log ("on join (PlayerDB)");
 		AddPlayer (message.playerId);
 	}
 
