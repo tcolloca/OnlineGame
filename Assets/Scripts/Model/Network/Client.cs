@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Net;
 
-public class Client : NetworkManager {
+public class Client : NetworkManager, GameMessageListener {
 
 	public bool hasJoined { get; private set; }
 
@@ -14,6 +14,7 @@ public class Client : NetworkManager {
 		this.playerId = playerId;
 		this.hasJoined = false;
 		MessageMulticaster.Instance.AddListener (this);
+		GameMessageMulticaster.Instance.AddListener (this);
 	}
 		
 	public Client ConnectTo (int serverPort) {
@@ -35,12 +36,16 @@ public class Client : NetworkManager {
 		}
 	}
 
+	public override void onMovement (MovementMessage movementMessage) {
+		Send (movementMessage);
+	}
+
 	public void Join () {
 		Send (new JoinMessage (playerId));
 	}
 
 	public void Send (IBitBufferSerializable obj) {
-		Send (obj, new IPEndPoint (IPAddress.Parse("192.168.0.116"), serverPort));
+		Send (obj, new IPEndPoint (IPAddress.Parse("192.168.0.14"), serverPort));
 	}
 }
 

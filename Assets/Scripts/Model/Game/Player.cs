@@ -16,6 +16,7 @@ public class Player : MessageAdapter {
 	}
 
 	public void SetPosition (Position position) {
+		Debug.Log (position.x + " " + position.y);
 		this.position = position;
 	}
 
