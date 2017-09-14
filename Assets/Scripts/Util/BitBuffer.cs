@@ -66,6 +66,10 @@ public class BitBuffer {
 	}
 
 	public void EnqueueBits (byte value, int n) {
+		if (n == 0) {
+			Debug.LogWarning ("Enqueuing 0 bits.");
+			return;
+		}
 		int firstN = Math.Min (8 - (size % 8), n);
 		int lastN = n - firstN;
 		EnqueueValue ((byte) value, firstN);
@@ -115,6 +119,10 @@ public class BitBuffer {
 	}
 
 	public byte DequeueBits (int n) {
+		if (n == 0) {
+			Debug.LogWarning ("Dequeueing 0 bits");
+			return 0;
+		}
 		int firstN = n - start;
 		int lastN = n - firstN;
 		byte firstB = DequeueValue (firstN);

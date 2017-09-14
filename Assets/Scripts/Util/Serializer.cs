@@ -20,23 +20,18 @@ public class Serializer {
 				bitBuffer.EnqueueEnum (ClientMessageType.JOIN, ClientMessageType.TOTAL);
 			} else if (obj is LeaveMessage) {
 				bitBuffer.EnqueueEnum (ClientMessageType.LEAVE, ClientMessageType.TOTAL);
-			} else if (obj is GameEvent) {
-				bitBuffer.EnqueueEnum (ClientMessageType.GAME, ClientMessageType.TOTAL);
+			} else if (obj is GameMessage) {
 				if (obj is MovementMessage) {
 					bitBuffer.EnqueueEnum (GameMessageType.MOVEMENT, GameMessageType.TOTAL);
 				}
 			}
 		}
 		obj.Serialize (bitBuffer);
-		bitBuffer.Print ();
-		Debug.Log ("----");
 		return bitBuffer.Bytes;
 	}
 
 	public 	Message Deserialize (byte[] bytes) {
 		BitBuffer bitBuffer = new BitBuffer (bytes);
-//		Debug.Log ("****");
-//		bitBuffer.Print ();
 		switch ((MessageType) bitBuffer.DequeueEnum (MessageType.TOTAL)) {
 		case MessageType.CLIENT:
 			switch ((ClientMessageType)bitBuffer.DequeueEnum (ClientMessageType.TOTAL)) {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovementMessage : GameEvent {
+public class MovementMessage : GameMessage {
 
 	public int playerId { get; private set; }
 	public bool[] rdlu { get; private set; }

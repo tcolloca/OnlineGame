@@ -6,10 +6,12 @@ using UnityEngine;
 public class Server : NetworkManager {
 
 	private HashSet<IPEndPoint> clientEndPoints;
+	private GameResolver gameResolver;
 
 	public Server(int port) : base (port) {
 		clientEndPoints = new HashSet<IPEndPoint> ();
 		MessageMulticaster.Instance.AddListener (this);
+		gameResolver = new GameResolver ();
 	}
 
 	public override ParsedDatagram Receive () {
