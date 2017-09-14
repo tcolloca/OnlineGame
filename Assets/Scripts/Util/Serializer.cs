@@ -8,13 +8,11 @@ public class Serializer {
 		if (ConfigProperties.Instance.isServer) {
 			bitBuffer.EnqueueEnum (MessageType.SERVER, MessageType.TOTAL);
 			if (obj is PlayerJoinedMessage) {
-				bitBuffer.EnqueueEnum (ServerMessageType.PLAYER_JOINED, MessageType.SERVER);
-			}
-			if (obj is PlayerLeftMessage) {
-				bitBuffer.EnqueueEnum (ServerMessageType.PLAYER_LEFT, MessageType.SERVER);
-			}
-			if (obj is SnapshotMessage) {
-				bitBuffer.EnqueueEnum (ServerMessageType.SNAPSHOT, MessageType.SERVER);
+				bitBuffer.EnqueueEnum (ServerMessageType.PLAYER_JOINED, ServerMessageType.TOTAL);
+			} else if (obj is PlayerLeftMessage) {
+				bitBuffer.EnqueueEnum (ServerMessageType.PLAYER_LEFT, ServerMessageType.TOTAL);
+			} else if (obj is SnapshotMessage) {
+				bitBuffer.EnqueueEnum (ServerMessageType.SNAPSHOT, ServerMessageType.TOTAL);
 			}
 		} else {
 			bitBuffer.EnqueueEnum (MessageType.CLIENT, MessageType.TOTAL);
@@ -26,8 +24,8 @@ public class Serializer {
 			}
 		}
 		bitBuffer.EnqueueBytes (obj.Serialize ());
-//		bitBuffer.Print ();
-//		Debug.Log ("----");
+		bitBuffer.Print ();
+		Debug.Log ("----");
 		return bitBuffer.Bytes;
 	}
 

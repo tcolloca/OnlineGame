@@ -35,7 +35,9 @@ public class PlayerDatabase : MessageAdapter {
 	}
 
 	public void AddPlayer (int id) {
-		AddPlayer (new Player(id, playerGo));
+		if (!players.ContainsKey(id)) {			
+			AddPlayer (new Player(id, playerGo));
+		}
 	}
 
 	public void AddPlayer (Player player) {
