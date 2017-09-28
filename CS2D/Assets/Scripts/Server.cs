@@ -26,6 +26,7 @@ public class Server : MonoBehaviour {
 
 	void Update() {
 		Packet inPacket = channel.GetPacket ();
+		Debug.Log (inPacket);
 		if (inPacket != null) {
 			//read it!
 			BitBuffer bitBuffer = inPacket.buffer;

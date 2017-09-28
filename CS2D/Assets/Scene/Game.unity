@@ -77,17 +77,15 @@ LightmapSettings:
     m_PVRDirectSampleCount: 32
     m_PVRSampleCount: 500
     m_PVRBounces: 2
-    m_PVRFilterTypeDirect: 0
-    m_PVRFilterTypeIndirect: 0
-    m_PVRFilterTypeAO: 0
+    m_PVRFiltering: 0
     m_PVRFilteringMode: 1
     m_PVRCulling: 1
     m_PVRFilteringGaussRadiusDirect: 1
     m_PVRFilteringGaussRadiusIndirect: 5
     m_PVRFilteringGaussRadiusAO: 2
-    m_PVRFilteringAtrousPositionSigmaDirect: 0.5
-    m_PVRFilteringAtrousPositionSigmaIndirect: 2
-    m_PVRFilteringAtrousPositionSigmaAO: 1
+    m_PVRFilteringAtrousColorSigma: 1
+    m_PVRFilteringAtrousNormalSigma: 1
+    m_PVRFilteringAtrousPositionSigma: 1
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 0
 --- !u!196 &5
@@ -282,6 +280,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serverPort: 9000
   clientPort: 9001
+  fakeDelay: 0.1
   playerPrefab: {fileID: 1394931143170682, guid: f11c8388590024aca96c2ec53291845e,
     type: 2}
 --- !u!4 &245635769
@@ -1905,9 +1904,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 035e4ffd05f2f4f998b28edac3576dcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverIp: 127.0.0.1
   serverPort: 9000
   clientPort: 9001
+  playerPrefab: {fileID: 1743185680436656, guid: fed86e43f5fa3854ebaa4ee82cfc1cfb,
+    type: 2}
   playerId: 10000
 --- !u!4 &1828081607
 Transform:

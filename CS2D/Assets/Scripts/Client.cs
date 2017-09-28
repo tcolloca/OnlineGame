@@ -8,9 +8,12 @@ public class Client : MonoBehaviour {
 	public int clientPort;
 	public Object playerPrefab;
 	Channel channel;
+	List<ClientMessage> outMessages = new List<ClientMessage>();
 
 	List<PlayerNetworkView> players = new List<PlayerNetworkView>();
 	public int playerId;
+
+	private PlayerController ownPlayer;
 
 	void Start() {
 		channel = new Channel("127.0.0.1", clientPort, serverPort);
@@ -23,30 +26,19 @@ public class Client : MonoBehaviour {
 	void Update() {
 		if (Input.GetKeyDown(KeyCode.Space)) {
 			//send player connect message
-			Packet p = new Packet();
-			ConnectPlayerMessage connectPlayerMessage = new ConnectPlayerMessage(playerId);
-			p.buffer.PutInt(1);
-			connectPlayerMessage.Save(p.buffer);
-			p.buffer.Flip ();
-			channel.Send(p);
+			outMessages.Add(new ConnectPlayerMessage(playerId));
 		}
 
-		Packet inPacket = channel.GetPacket ();
-		if (inPacket != null) {
-			Debug.Log (inPacket);
-			BitBuffer bitBuffer = inPacket.buffer;
-			int messageCount = bitBuffer.GetInt ();
-			for (int i = 0; i < messageCount; i++) {
-				//parse message
-				ServerMessage serverMessage = ReadServerMessage(bitBuffer);
-				if (serverMessage != null) {
-					ProcessClientMessage(serverMessage);
-				}
-			}
-		}	
+		ReadMessages ();	
+
+		if (ownPlayer != null) {
+			outMessages.Add(new PlayerInputMessage (ownPlayer.playerInput));
+		}
+
+		SendMessages ();
 	}
 
-	ClientMessage ReadServerMessage(BitBuffer bitBuffer) {
+	ServerMessage ReadServerMessage(BitBuffer bitBuffer) {
 		ServerMessageType messageType = bitBuffer.GetEnum<ServerMessageType> ((int)ServerMessageType.TOTAL);
 		ServerMessage serverMessage = null;
 		switch (messageType) {
@@ -97,12 +89,12 @@ public class Client : MonoBehaviour {
 		GameData gameData = snapshot.GameSnapshot;
 		List<PlayerData> playerDatas = gameData.Players;
 		foreach (PlayerData playerData in playerDatas) {
-			int playerId = playerData.playerId;
+			int playerId = playerData.PlayerId;
 			PlayerNetworkView player = GetPlayerWithId (playerId);
 			if (player == null) {
 				ConnectPlayer (playerId);
 			}
-			player.UpdatePosition (playerData.position);
+			player.UpdatePosition (playerData.Position);
 
 		}
 	}
@@ -118,12 +110,13 @@ public class Client : MonoBehaviour {
 		player = playerGO.GetComponent<PlayerNetworkView> ();
 		player.id = playerId;
 		if (playerId.Equals(this.playerId)) {
-			player = playerGO.AddComponent<PlayerController> ();
+			ownPlayer = playerGO.AddComponent<PlayerController> ();
+			ownPlayer.playerInput = new PlayerInput ();
 		}
-		players.Add(PlayerNetworkView);
+		players.Add(player);
 	}
 
-	private void DisconnectPlayer(Player player) {
+	private void DisconnectPlayer(PlayerNetworkView player) {
 		Destroy(player.gameObject);
 		players.Remove(player);
 	}
@@ -135,5 +128,39 @@ public class Client : MonoBehaviour {
 			}
 		}
 		return null;
+	}
+
+	private void ReadMessages () {
+		Packet inPacket = channel.GetPacket ();
+		if (inPacket != null) {
+			Debug.Log (inPacket);
+			BitBuffer bitBuffer = inPacket.buffer;
+			int messageCount = bitBuffer.GetInt ();
+			for (int i = 0; i < messageCount; i++) {
+				//parse message
+				ServerMessage serverMessage = ReadServerMessage(bitBuffer);
+				if (serverMessage != null) {
+					ProcessServerMessage(serverMessage);
+				}
+			}
+		}
+	}
+
+	private void SendMessages () {
+		if (outMessages.Count <= 0) {
+			return;
+		}
+		Packet outPacket = new Packet ();
+		outPacket.buffer.PutInt (outMessages.Count);
+		for (int i = 0; i < outMessages.Count; i++) {
+			ClientMessage clientMessage = outMessages [i];
+			clientMessage.Save (outPacket.buffer);
+			outMessages.RemoveAt (i);
+			i--;
+		}
+
+		outPacket.buffer.Flip ();
+		Debug.Log ("Sending from client: " + outPacket);
+		channel.Send (outPacket);				
 	}
 }

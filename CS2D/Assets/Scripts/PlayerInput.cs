@@ -11,6 +11,9 @@ public class PlayerInput {
 	public bool right;
 	public bool shoot;
 
+	public PlayerInput() {
+	}
+
 	public PlayerInput(bool up, bool down, bool left, bool right, bool shoot) {
 		this.up = up;
 		this.down = down;

@@ -4,16 +4,13 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
-	PlayerInput playerInput;
-
-	// Use this for initialization
-	void Start () {
-		
-	}
+	public PlayerInput playerInput { get; set; }
 	
 	// Update is called once per frame
 	void Update () {
-		bool up, down, left, right, shoot = false;
+		Debug.Log ("Player controller update");
+		bool up, down, left, right, shoot;
+		up = down = left = right = shoot = false;
 		if (Input.GetKey (KeyCode.W)) {
 			up = true;
 		}

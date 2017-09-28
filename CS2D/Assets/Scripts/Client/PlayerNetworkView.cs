@@ -16,6 +16,6 @@ public class PlayerNetworkView : MonoBehaviour {
 	}
 
 	public void UpdatePosition (Vector2 position) {
-		transform.position.Set (position);
+		transform.position = position;
 	}
 }
