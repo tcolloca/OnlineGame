@@ -82,19 +82,11 @@ public class Client : MonoBehaviour {
 	}
 
 	public void ProcessPlayerConnected(PlayerConnectedMessage message) {
-		int playerId = message.PlayerId;
-		PlayerNetworkView player = GetPlayerWithId (playerId);
+		PlayerNetworkView player = GetPlayerWithId (message.PlayerId);
 		if (player != null) {
 			DisconnectPlayer (player);
 		}
-
-		GameObject playerGO = Instantiate (playerPrefab) as GameObject;
-		playerGO.name = "Player " + playerId; 
-		player = playerGO.GetComponent<PlayerNetworkView> ();
-		if (playerId.Equals(this.playerId)) {
-			player = playerGO.AddComponent<PlayerController> ();
-		}
-		players.Add(PlayerNetworkView);
+		ConnectPlayer (message.PlayerId);
 	}
 
 	public void ProcessPlayerDisconnected(PlayerDisconnectedMessage message) {
@@ -105,27 +97,40 @@ public class Client : MonoBehaviour {
 		GameData gameData = snapshot.GameSnapshot;
 		List<PlayerData> playerDatas = gameData.Players;
 		foreach (PlayerData playerData in playerDatas) {
-			playerData.position;
+			int playerId = playerData.playerId;
+			PlayerNetworkView player = GetPlayerWithId (playerId);
+			if (player == null) {
+				ConnectPlayer (playerId);
+			}
+			player.UpdatePosition (playerData.position);
+
 		}
 	}
 
-	public void DisconnectPlayer(Player player) {
+	private void ConnectPlayer (int playerId) {
+		PlayerNetworkView player = GetPlayerWithId (playerId);
+		if (player != null) {
+			DisconnectPlayer (player);
+		}
+
+		GameObject playerGO = Instantiate (playerPrefab) as GameObject;
+		playerGO.name = "Player " + playerId; 
+		player = playerGO.GetComponent<PlayerNetworkView> ();
+		player.id = playerId;
+		if (playerId.Equals(this.playerId)) {
+			player = playerGO.AddComponent<PlayerController> ();
+		}
+		players.Add(PlayerNetworkView);
+	}
+
+	private void DisconnectPlayer(Player player) {
 		Destroy(player.gameObject);
 		players.Remove(player);
 	}
 
-	Player GetPlayerWithId(int playerId) {
+	private PlayerNetworkView GetPlayerWithId(int playerId) {
 		for (int i = 0; i < players.Count; i++) {
 			if (players[i].id == playerId) {
-				return players[i];
-			}
-		}
-		return null;
-	}
-
-	public Player GetPlayerWithEndPoint(IPEndPoint endPoint) {
-		for (int i = 0; i < players.Count; i++) {
-			if (players[i].endPoint.Equals(endPoint)) {
 				return players[i];
 			}
 		}
