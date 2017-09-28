@@ -13,8 +13,22 @@ public class PlayerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		bool up, down, left, right, shoot = false;
 		if (Input.GetKey (KeyCode.W)) {
-			
+			up = true;
 		}
+		if (Input.GetKey (KeyCode.S)) {
+			down = true;
+		}
+		if (Input.GetKey (KeyCode.A)) {
+			left = true;
+		}
+		if (Input.GetKey (KeyCode.D)) {
+			right = true;
+		}
+		if (Input.GetKey (KeyCode.RightShift)) {
+			shoot = true;
+		}
+		playerInput = new PlayerInput (up, down, left, right, shoot);
 	}
 }
