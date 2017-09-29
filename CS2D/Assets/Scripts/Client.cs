@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Client : MonoBehaviour {
 
@@ -14,6 +15,18 @@ public class Client : MonoBehaviour {
 	public int playerId;
 
 	private PlayerController ownPlayer;
+
+	public int buffDesiredLength;
+
+	public double simSpeed;
+	public double simSpeedIncFactor;
+
+	public double frameRate;
+	private int frame = 1;
+	private double iniTime;
+	private double simIniTime;
+	private double simTime;
+	List<GameData> snapshots = new List<GameData> ();
 
 	void Start() {
 		channel = new Channel("127.0.0.1", clientPort, serverPort);
@@ -30,6 +43,8 @@ public class Client : MonoBehaviour {
 		}
 
 		ReadMessages ();	
+
+		Interpolate ();
 
 		if (ownPlayer != null) {
 			outMessages.Add(new PlayerInputMessage (ownPlayer.playerInput));
@@ -87,7 +102,34 @@ public class Client : MonoBehaviour {
 
 	public void ProcessSnapshot(SnapshotMessage snapshot) {
 		GameData gameData = snapshot.GameSnapshot;
-		List<PlayerData> playerDatas = gameData.Players;
+		if (simTime == 0 && iniTime == 0) {
+			Debug.Log ("reset");
+			iniTime = Time.realtimeSinceStartup;
+			simIniTime = gameData.Time;
+		}
+		snapshots.Add (gameData);
+		snapshots.OrderBy (snap => snap.Time).ToList ();
+	}
+
+	public void Interpolate () {
+		UpdateSimSpeed ();
+		simTime = Time.realtimeSinceStartup - iniTime; 
+		Debug.Log ("simTime: " + simTime);
+		Debug.Log ("frameTime: " + frame * frameRate);
+		Debug.Log ("frame: " + frame);
+		double expectedSimTime = frame * frameRate * simSpeed;
+		if (simTime < expectedSimTime || snapshots.Count == 0) {
+			return;
+		}
+		GameData interpolated;
+	//	do {
+			interpolated = snapshots [0];
+			snapshots.RemoveAt (0);
+	//		Debug.Log ("snap Time: " + interpolated.Time);
+	//		Debug.Log ("snapSearch Time: " + simIniTime + frame * frameRate);
+		//} while (interpolated.Time < simIniTime + frame * frameRate && snapshots.Count > 0);
+
+		List<PlayerData> playerDatas = interpolated.Players;
 		foreach (PlayerData playerData in playerDatas) {
 			int playerId = playerData.PlayerId;
 			PlayerNetworkView player = GetPlayerWithId (playerId);
@@ -95,7 +137,17 @@ public class Client : MonoBehaviour {
 				ConnectPlayer (playerId);
 			}
 			player.UpdatePosition (playerData.Position);
+		}
+		frame++;
+	}
 
+	private void UpdateSimSpeed() {
+		double factor = 2 - 1.0 / (buffDesiredLength - snapshots.Count);
+		Debug.Log (simSpeed);
+		if (snapshots.Count < buffDesiredLength) {
+			simSpeed /= factor;
+		} else {
+			simSpeed *= factor;
 		}
 	}
 

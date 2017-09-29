@@ -280,7 +280,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serverPort: 9000
   clientPort: 9001
-  fakeDelay: 0.1
+  fakeDelay: 0
+  fakePacketLoss: 0
   playerPrefab: {fileID: 1394931143170682, guid: f11c8388590024aca96c2ec53291845e,
     type: 2}
 --- !u!4 &245635769
@@ -1909,6 +1910,10 @@ MonoBehaviour:
   playerPrefab: {fileID: 1743185680436656, guid: fed86e43f5fa3854ebaa4ee82cfc1cfb,
     type: 2}
   playerId: 10000
+  buffDesiredLength: 5
+  simSpeed: 1
+  simSpeedIncFactor: 1.1
+  frameRate: 0.2
 --- !u!4 &1828081607
 Transform:
   m_ObjectHideFlags: 0
