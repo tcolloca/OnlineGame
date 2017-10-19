@@ -8,7 +8,6 @@ public class PlayerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		Debug.Log ("Player controller update");
 		bool up, down, left, right, shoot;
 		up = down = left = right = shoot = false;
 		if (Input.GetKey (KeyCode.W)) {

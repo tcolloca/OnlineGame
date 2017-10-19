@@ -5,7 +5,11 @@ using UnityEngine;
 public class GameData {
 
 	float time;
-	List<PlayerData> playersData = new List<PlayerData>();
+	public List<PlayerData> playersData  { get; set; }
+
+	public GameData () {
+		playersData = new List<PlayerData> ();
+	}
 
 	public void Save(BitBuffer bitBuffer) {
 		bitBuffer.PutFloat (time);

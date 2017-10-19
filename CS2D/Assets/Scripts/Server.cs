@@ -17,6 +17,8 @@ public class Server : MonoBehaviour {
 	List<Player> players = new List<Player>();
 	List<ServerMessage> outMessages = new List<ServerMessage>();
 
+	int i = 0;
+
 	void Start() {
 		channel = new Channel(null, serverPort, clientPort);
 	}
@@ -26,8 +28,10 @@ public class Server : MonoBehaviour {
 	}
 
 	void Update() {
+		if (i++ % 100 == 0) {
+			return;
+		}
 		Packet inPacket = channel.GetPacket ();
-		Debug.Log (inPacket);
 		if (inPacket != null) {
 			//read it!
 			BitBuffer bitBuffer = inPacket.buffer;

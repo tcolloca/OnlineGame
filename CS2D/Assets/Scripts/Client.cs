@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 public class Client : MonoBehaviour {
 
 	public int serverPort;
 	public int clientPort;
-	public Object playerPrefab;
+	public GameObject playerPrefab;
 	Channel channel;
 	List<ClientMessage> outMessages = new List<ClientMessage>();
 
@@ -19,7 +20,6 @@ public class Client : MonoBehaviour {
 	public int buffDesiredLength;
 
 	public double simSpeed;
-	public double simSpeedIncFactor;
 
 	public double frameRate;
 	private int frame = 1;
@@ -27,6 +27,8 @@ public class Client : MonoBehaviour {
 	private double simIniTime;
 	private double simTime;
 	List<GameData> snapshots = new List<GameData> ();
+
+	int i = 0;
 
 	void Start() {
 		channel = new Channel("127.0.0.1", clientPort, serverPort);
@@ -44,7 +46,13 @@ public class Client : MonoBehaviour {
 
 		ReadMessages ();	
 
-		Interpolate ();
+		if (simIniTime != 0) {
+			if (Input.GetKey (KeyCode.K)) {
+				;
+			} else {
+				Interpolate ();
+			}
+		}
 
 		if (ownPlayer != null) {
 			outMessages.Add(new PlayerInputMessage (ownPlayer.playerInput));
@@ -102,9 +110,7 @@ public class Client : MonoBehaviour {
 
 	public void ProcessSnapshot(SnapshotMessage snapshot) {
 		GameData gameData = snapshot.GameSnapshot;
-		if (simTime == 0 && iniTime == 0) {
-			Debug.Log ("reset");
-			iniTime = Time.realtimeSinceStartup;
+		if (simIniTime == 0) {
 			simIniTime = gameData.Time;
 		}
 		snapshots.Add (gameData);
@@ -112,23 +118,61 @@ public class Client : MonoBehaviour {
 	}
 
 	public void Interpolate () {
+		Debug.Log ("snaps count: " + snapshots.Count);
+		Debug.Log ("speed: " + simSpeed);
+
 		UpdateSimSpeed ();
+
+		simTime += Time.deltaTime * simSpeed;
+
+		RemoveOldSnapshots ();
+
+		UpdateSimSpeed ();
+
+		if (snapshots.Count > 1) {
+			GameData start = snapshots [0];
+			GameData end = snapshots [1];
+			GameData interpolated = start;
+			// GameData interpolated = InterpolateDatas (start, end);
+			Debug.Log ("Using: " + (interpolated.Time - simIniTime));
+			List<PlayerData> playerDatas = interpolated.Players;
+			foreach (PlayerData playerData in playerDatas) {
+				int playerId = playerData.PlayerId;
+				PlayerNetworkView player = GetPlayerWithId (playerId);
+				if (player == null) {
+					ConnectPlayer (playerId);
+				}
+				player.UpdatePosition (playerData.Position);
+			}
+		}
+/*
 		simTime = Time.realtimeSinceStartup - iniTime; 
-		Debug.Log ("simTime: " + simTime);
-		Debug.Log ("frameTime: " + frame * frameRate);
-		Debug.Log ("frame: " + frame);
+		if (snapshots.Count < buffDesiredLength && simSpeed > 1
+			|| snapshots.Count > buffDesiredLength && simSpeed < 1) {
+			simSpeed = 1;
+		}
 		double expectedSimTime = frame * frameRate * simSpeed;
-		if (simTime < expectedSimTime || snapshots.Count == 0) {
+		Debug.Log ("simSpeed: " + simSpeed);
+		Debug.Log ("simTime: " + simTime);
+		Debug.Log ("frameTime: " + expectedSimTime);
+		Debug.Log ("frame: " + frame);
+
+		Debug.Log ("snap count: " + snapshots.Count);
+		UpdateSimSpeed (expectedSimTime, simTime);
+
+		if (expectedSimTime > simTime || snapshots.Count == 0) {
+			if (snapshots.Count > buffDesiredLength) {
+				simSpeed = 1;
+			}
+			Debug.Log ("nothing to do...");
 			return;
 		}
-		GameData interpolated;
-	//	do {
-			interpolated = snapshots [0];
-			snapshots.RemoveAt (0);
-	//		Debug.Log ("snap Time: " + interpolated.Time);
-	//		Debug.Log ("snapSearch Time: " + simIniTime + frame * frameRate);
-		//} while (interpolated.Time < simIniTime + frame * frameRate && snapshots.Count > 0);
 
+		RemoveOldSnapshots (expectedSimTime);
+
+		GameData interpolated = snapshots [0];
+		snapshots.RemoveAt (0);
+		Debug.Log ("Using: " + (interpolated.Time - simIniTime));
 		List<PlayerData> playerDatas = interpolated.Players;
 		foreach (PlayerData playerData in playerDatas) {
 			int playerId = playerData.PlayerId;
@@ -138,17 +182,101 @@ public class Client : MonoBehaviour {
 			}
 			player.UpdatePosition (playerData.Position);
 		}
-		frame++;
+		expectedSimTime = interpolated.Time - simIniTime;
+		frame = (int) Math.Max(frame, expectedSimTime / frameRate); */
+	}
+
+	private GameData InterpolateDatas (GameData start, GameData end) {
+		Debug.Log ("start gd: " + (start.Time - simIniTime));
+		Debug.Log ("end gd: " + (end.Time - simIniTime));
+		Debug.Log ("sim: " + simTime);
+		if (end.Time == start.Time) {
+			return end;
+		}
+		float p = (float) (simTime - (start.Time - simIniTime)) / (end.Time - start.Time);
+		Debug.Log ("prop: " + p);
+		List<PlayerData> interpolatedPlayerDatas = new List<PlayerData> ();
+		// TODO : Player is gone from one snap to another
+		for (int i = 0; i < end.Players.Count; i++) {
+			PlayerData endPlayer = end.Players [i];
+			Vector2 interPosition = Vector2.zero;
+			foreach (PlayerData playerData in start.Players) {
+				if (playerData.PlayerId.Equals (endPlayer.PlayerId)) {
+					Debug.Log ("start pos: " + playerData.Position);
+					Debug.Log ("end pos: " + endPlayer.PlayerId);
+					interPosition = Vector2.Lerp (playerData.Position, endPlayer.Position, p);
+					break;
+				}
+			}
+			Debug.Log ("inter pos: " + interPosition);
+			PlayerData interData = new PlayerData ();
+			interData.PlayerId = endPlayer.PlayerId;
+			interData.Position = interPosition;
+			interpolatedPlayerDatas.Add (interData);
+		}
+		GameData interGameData = new GameData ();
+		interGameData.playersData = interpolatedPlayerDatas;
+		interGameData.Time = (float) simTime;
+		return interGameData;
+	}
+
+	private void RemoveOldSnapshots () {
+		if (snapshots.Count == 0) {
+			return;
+		}
+		GameData prev = null;
+		GameData interpolated = snapshots [0];
+		while (simTime > interpolated.Time - simIniTime && snapshots.Count > 0) {
+			prev = interpolated;
+			interpolated = snapshots [0];
+			if (simTime > interpolated.Time - simIniTime) {
+				Debug.Log ("Removing useless. snap Time: " + (interpolated.Time - simIniTime));
+				snapshots.RemoveAt (0);
+			}
+		}
+		if (prev != null) {
+			Debug.Log ("Reinserting: " + (prev.Time - simIniTime));
+			snapshots.Insert (0, prev);
+		}
 	}
 
 	private void UpdateSimSpeed() {
-		double factor = 2 - 1.0 / (buffDesiredLength - snapshots.Count);
-		Debug.Log (simSpeed);
+		double rawFactor = 1 - 1.0 / (Mathf.Abs(buffDesiredLength - snapshots.Count) + 1);
+		double maxFactor = 1.1;
+		double factor = (maxFactor - 1) * rawFactor + 1;
 		if (snapshots.Count < buffDesiredLength) {
-			simSpeed /= factor;
-		} else {
+			if (simSpeed > 1) {
+				simSpeed = 1;
+			}
+			simSpeed /= factor; 
+		} else if (snapshots.Count > buffDesiredLength) {
+			if (simSpeed < 1) {
+				simSpeed = 1;
+			}
 			simSpeed *= factor;
+		} else {
+			simSpeed = 1;
 		}
+/*		if (buffDesiredLength == snapshots.Count) {
+			return;
+		}
+		int freshSnapsCount = snapshots.FindAll (snap => snap.Time - simIniTime >= limitTime).Count;
+		double rawFactor = 1 - 1.0 / (Mathf.Abs(buffDesiredLength - freshSnapsCount) + 1);
+		double minSpeedLimit = 0.05;
+		double maxSpeedLimit = 10;
+		double maxFactor = 1.01;
+		double factor = (maxFactor - 1) * rawFactor + 1;
+
+		Debug.Log ("factor: " + factor);
+
+		if (snapshots.Count < buffDesiredLength && simSpeed > minSpeedLimit) {
+			simSpeed /= factor;
+		} else if (snapshots.Count >= buffDesiredLength && simSpeed < maxSpeedLimit) {
+			if (limitTime > simTime) {
+				Debug.Log ("WTF!!!!: " + (snapshots [0].Time - simIniTime));
+			}
+			simSpeed *= factor;
+		} */
 	}
 
 	private void ConnectPlayer (int playerId) {
@@ -183,9 +311,8 @@ public class Client : MonoBehaviour {
 	}
 
 	private void ReadMessages () {
-		Packet inPacket = channel.GetPacket ();
-		if (inPacket != null) {
-			Debug.Log (inPacket);
+		Packet inPacket;
+		while ((inPacket = channel.GetPacket ()) != null) {
 			BitBuffer bitBuffer = inPacket.buffer;
 			int messageCount = bitBuffer.GetInt ();
 			for (int i = 0; i < messageCount; i++) {
@@ -212,7 +339,6 @@ public class Client : MonoBehaviour {
 		}
 
 		outPacket.buffer.Flip ();
-		Debug.Log ("Sending from client: " + outPacket);
 		channel.Send (outPacket);				
 	}
 }
