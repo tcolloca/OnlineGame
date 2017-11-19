@@ -132,8 +132,8 @@ public class Client : MonoBehaviour {
 		if (snapshots.Count > 1) {
 			GameData start = snapshots [0];
 			GameData end = snapshots [1];
-			GameData interpolated = start;
-			// GameData interpolated = InterpolateDatas (start, end);
+			//GameData interpolated = start;
+			GameData interpolated = InterpolateDatas (start, end);
 			Debug.Log ("Using: " + (interpolated.Time - simIniTime));
 			List<PlayerData> playerDatas = interpolated.Players;
 			foreach (PlayerData playerData in playerDatas) {

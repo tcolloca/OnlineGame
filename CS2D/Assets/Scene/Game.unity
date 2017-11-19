@@ -280,7 +280,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serverPort: 9000
   clientPort: 9001
-  fakeDelay: 0.5
+  fakeDelay: 0.1
   fakePacketLoss: 20
   playerPrefab: {fileID: 1394931143170682, guid: f11c8388590024aca96c2ec53291845e,
     type: 2}
