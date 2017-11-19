@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour {
 		if (Input.GetKey (KeyCode.D)) {
 			right = true;
 		}
-		if (Input.GetKey (KeyCode.RightShift)) {
+		if (Input.GetKey (KeyCode.Space)) {
 			shoot = true;
 		}
 		playerInput = new PlayerInput (up, down, left, right, shoot);

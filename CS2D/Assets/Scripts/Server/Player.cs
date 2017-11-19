@@ -12,6 +12,7 @@ public class Player : MonoBehaviour {
 	public bool showVisualRepresentation;
 	public GameObject visualRepresentationGO;
 
+	private CommunicationManager communicationManager = new CommunicationManager();
 	private Transform ownTransform;
 
 	public int Id {
@@ -31,9 +32,23 @@ public class Player : MonoBehaviour {
 	void Start () {
 		
 	}
+
+	// Read in messages
+	void ProcessMessages() {		
+		while (communicationManager.HasMessage ()) {
+			Message message = communicationManager.GetMessage ();
+			switch (message.Type) {
+			case MessageType.PLAYER_INPUT:
+				ProcessPlayerInput (message as PlayerInputMessage);
+				break;
+			}
+		}
+	}
 	
 	// Update is called once per frame
 	void Update () {
+		ProcessMessages ();
+
 		visualRepresentationGO.SetActive (showVisualRepresentation);
 
 		//update orientation
@@ -95,5 +110,15 @@ public class Player : MonoBehaviour {
 		playerData.PlayerId = id;
 		playerData.Position = new Vector2 (ownTransform.position.x, ownTransform.position.y);
 		return playerData;
+	}
+
+	public CommunicationManager CommunicationManager {
+		get {
+			return communicationManager;
+		}
+	}
+		
+	void ProcessPlayerInput(PlayerInputMessage playerInputMessage) {		
+		Input = playerInputMessage.Input;
 	}
 }
