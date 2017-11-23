@@ -85,6 +85,12 @@ public class Client : MonoBehaviour {
 		case MessageType.SNAPSHOT:
 			serverMessage = new SnapshotMessage ();
 			break;
+		case MessageType.ACK_RELIABLE_MAX_WAIT_TIME:
+			serverMessage = AckReliableMessage.CreateAckReliableMessageMessageToReceive ();			
+			break;
+		case MessageType.ACK_RELIABLE_SEND_EVERY_PACKET:
+			serverMessage = AckReliableSendEveryFrameMessage.CreateAckReliableSendEveryFrameMessageMessageToReceive ();
+			break;
 		default:
 			Debug.LogError("Got a server message that cannot be understood");
 			return null;
